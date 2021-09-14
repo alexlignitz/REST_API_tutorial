@@ -1,18 +1,17 @@
 from .models import Article
 from .serializers import ArticleSerializer
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 
-@api_view(['GET', 'POST'])
-def article_list(request):
-    if request.method == "GET":
+class ArticleAPIView(APIView):
+    def get(self, request):
         articles = Article.objects.all()
         serializer = ArticleSerializer(articles, many=True)
         return Response(serializer.data)
 
-    elif request.method == "POST":
+    def post(self, request):
         serializer = ArticleSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -21,18 +20,21 @@ def article_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def article_detail(request, pk):
-    try:
-        article = Article.objects.get(pk=pk)
-    except Article.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class ArticleDetailsAPIView(APIView):
 
-    if request.method == "GET":
+    def get_object(self, pk):
+        try:
+            return Article.objects.get(pk=pk)
+        except Article.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, pk):
+        article = self.get_object(pk)
         serializer = ArticleSerializer(article)
         return Response(serializer.data)
 
-    elif request.method == "PUT":
+    def put(self, request, pk):
+        article = self.get_object(pk)
         serializer = ArticleSerializer(article, data=request.data)
 
         if serializer.is_valid():
@@ -40,6 +42,7 @@ def article_detail(request, pk):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == "DELETE":
+    def delete(self, request, pk):
+        article = self.get_object(pk)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
