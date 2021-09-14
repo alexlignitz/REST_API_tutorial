@@ -3,9 +3,8 @@ from .serializers import ArticleSerializer
 from rest_framework import status, generics, mixins, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 
 
 # ViewSets
@@ -48,6 +47,8 @@ from django.shortcuts import get_object_or_404
 class ArticleViewSet(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [DjangoModelPermissions]
 
 
 # GenericViews
@@ -56,8 +57,8 @@ class GenericAPIView(generics.GenericAPIView, mixins.ListModelMixin, mixins.Crea
                      mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
-    # authentication_classes = [SessionAuthentication, BasicAuthentication]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    # authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
