@@ -2,7 +2,15 @@ from .models import Article
 from .serializers import ArticleSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics, mixins
+
+
+class GenericAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    serializer_class = ArticleSerializer
+    queryset = Article.objects.all()
+
+    def get(self, request):
+        return self.list(request)
 
 
 class ArticleAPIView(APIView):
